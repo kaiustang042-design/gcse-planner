@@ -643,7 +643,7 @@
     <header class="dashboard-header">
         <div class="title-area">
             <h1>Master GCSE Revision Planner (May 7th, 2027)[cite: 1]</h1>
-            <p>Smart Test Rearrangement & iPhone X Layout[cite: 1]</p>
+            <p>Smart Test Rearrangement & Multi-View Ranges[cite: 1]</p>
         </div>
         <div class="header-widgets">
             <button class="theme-toggle-btn" onclick="toggleTheme()">
@@ -710,8 +710,16 @@
             <div class="timetable-header">
                 <div class="panel-title">Schedule Overview</div>
                 <div class="date-picker-container">
-                    <label style="font-size:0.8rem; color: var(--text-muted);">Week Starting:</label>
+                    <label style="font-size:0.8rem; color: var(--text-muted);">Starting Date:</label>
                     <input type="date" id="week-start-date" onchange="generateSchedule()">
+                    
+                    <label style="font-size:0.8rem; color: var(--text-muted); margin-left: 6px;">View:</label>
+                    <select id="schedule-range-select" onchange="generateSchedule()" style="padding: 6px; font-size: 0.85rem;">
+                        <option value="week">1 Week</option>
+                        <option value="fortnight">Fortnight (2 Weeks)</option>
+                        <option value="month">1 Month</option>
+                    </select>
+
                     <button class="btn" onclick="generateSchedule()">Refresh</button>
                     <button class="btn btn-secondary" onclick="exportToICS()">📅 .ics</button>
                 </div>
@@ -1185,19 +1193,16 @@
                 document.getElementById('cd-days').innerText = '00';
                 document.getElementById('cd-hours').innerText = '00';
                 document.getElementById('cd-mins').innerText = '00';
-                document.getElementById('cd-secs').innerText = '00';
                 return;
             }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
             document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
             document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
             document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
-            document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
         }
 
         function saveData() {
@@ -1269,7 +1274,6 @@
                         const testTime = new Date(sub.testDate).getTime();
                         const daysUntilTest = (testTime - now) / (1000 * 60 * 60 * 24);
                         if (daysUntilTest > 0 && daysUntilTest <= 21) {
-                            // Smarter test rearrangement: massive priority boost for tests coming up within 3 weeks
                             testUrgencyWeight = (21 - daysUntilTest) * 3.5;
                         }
                     }
@@ -1469,6 +1473,8 @@
             if (sub) {
                 if (key === 'confidence' || key === 'testScore') {
                     sub[key] = parseFloat(value) || 0;
+                } else if (key === 'noTest') {
+                    sub[key] = value;
                 } else {
                     sub[key] = value;
                 }
@@ -1505,7 +1511,6 @@
             generateSchedule();
         }
 
-        // New feature: Move slot to next week for more frequent upcoming exam revision
         function moveSlotToNextWeek(slotKey, subjectId, lessonText) {
             if (!movedSlots[slotKey]) {
                 movedSlots[slotKey] = { subjectId, lessonText, timestamp: Date.now() };
@@ -1585,20 +1590,19 @@
             }
         }
 
-        function getDatesForSelectedWeek() {
-            const weekPicker = document.getElementById('week-start-date');
-            let selectedDate = weekPicker.value ? new Date(weekPicker.value) : new Date();
+        function getDatesForSelectedRange() {
+            const datePicker = document.getElementById('week-start-date');
+            const rangeSelect = document.getElementById('schedule-range-select').value;
+            let selectedDate = datePicker.value ? new Date(datePicker.value) : new Date();
 
-            const currentDay = selectedDate.getDay();
-            const distanceToMon = currentDay === 0 ? -6 : 1 - currentDay;
-
-            const monday = new Date(selectedDate);
-            monday.setDate(selectedDate.getDate() + distanceToMon);
+            let numDays = 7;
+            if (rangeSelect === 'fortnight') numDays = 14;
+            if (rangeSelect === 'month') numDays = 30;
 
             const dates = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
+            for (let i = 0; i < numDays; i++) {
+                const d = new Date(selectedDate);
+                d.setDate(selectedDate.getDate() + i);
                 dates.push(d);
             }
             return dates;
@@ -1622,7 +1626,7 @@
                 return;
             }
 
-            const dates = getDatesForSelectedWeek();
+            const dates = getDatesForSelectedRange();
             const weekdayHours = parseInt(document.getElementById('hours-weekday').value) || 2;
             const weekendHours = parseInt(document.getElementById('hours-weekend').value) || 4;
             const now = new Date();
@@ -1630,7 +1634,8 @@
             let subjectPoolIndex = 0;
 
             dates.forEach((date, index) => {
-                const isWeekend = index >= 5;
+                const dayOfWeek = date.getDay(); // 0 is Sunday, 6 is Saturday
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
                 const hours = isWeekend ? weekendHours : weekdayHours;
                 const isToday = date.toDateString() === now.toDateString();
                 const dateStrIso = date.toISOString().split('T')[0];
@@ -1712,7 +1717,6 @@
                     let lessonText = sub.lessons[activeLessonIndex];
                     let uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${dateStrIso}_${h}`;
 
-                    // Smarter test rearrangement
                     if (sub.testDate && !sub.noTest) {
                         const testTime = new Date(sub.testDate).setHours(0, 0, 0, 0);
                         const slotTime = new Date(date).setHours(0, 0, 0, 0);
@@ -1821,14 +1825,15 @@
 
         function exportToICS() {
             let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GCSE Master Planner//EN\n";
-            const dates = getDatesForSelectedWeek();
+            const dates = getDatesForSelectedRange();
             const weekdayHours = parseInt(document.getElementById('hours-weekday').value) || 2;
             const weekendHours = parseInt(document.getElementById('hours-weekend').value) || 4;
 
             let subjectPoolIndex = 0;
 
             dates.forEach((date, index) => {
-                const isWeekend = index >= 5;
+                const dayOfWeek = date.getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
                 const hours = isWeekend ? weekendHours : weekdayHours;
                 let timeStart = isWeekend ? 10 : 17;
                 const dateStrIso = date.toISOString().split('T')[0];
