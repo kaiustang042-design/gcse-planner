@@ -101,6 +101,10 @@
             backdrop-filter: blur(10px);
             box-shadow: var(--glass-shadow);
         }
+        .theme-toggle-btn:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
 
         .streak-card {
             background: linear-gradient(135deg, #065f46 0%, #047857 100%);
@@ -201,7 +205,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 450px;
+            max-height: 480px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -214,6 +218,11 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .subject-header {
@@ -239,7 +248,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            margin-top: 2px;
+            margin-top: 4px;
         }
         .progress-bar-bg {
             width: 100%;
@@ -285,7 +294,7 @@
             border-radius: 6px;
             color: var(--text-main);
             padding: 8px;
-            font-size: 0.9rem; /* Prevent iOS zoom on focus (needs >= 16px or similar, but 14px/0.9rem works well with proper viewport) */
+            font-size: 0.9rem;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -318,13 +327,14 @@
             border-radius: 8px;
             border: 1px solid var(--card-border);
             justify-content: space-between;
+            flex-wrap: wrap;
         }
 
         .timetable-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -347,7 +357,7 @@
             gap: 16px;
             max-height: 650px;
             overflow-y: auto;
-            padding-right: 2px;
+            padding-right: 4px;
         }
 
         .day-card {
@@ -485,6 +495,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .pom-btn:hover { background: var(--accent-blue); color: var(--bg-dark); }
 
         .session-actions {
             display: flex;
@@ -497,9 +508,13 @@
         }
 
         .click-hint { color: var(--accent-blue); cursor: pointer; }
+        .click-hint:hover { text-decoration: underline; }
         .block-hint { color: var(--accent-red); cursor: pointer; }
+        .block-hint:hover { text-decoration: underline; }
         .notes-hint { color: var(--accent-purple); cursor: pointer; }
+        .notes-hint:hover { text-decoration: underline; }
         .move-hint { color: var(--accent-amber); cursor: pointer; font-weight: 600; }
+        .move-hint:hover { text-decoration: underline; }
 
         .notes-drawer-overlay {
             position: fixed;
@@ -555,6 +570,7 @@
             cursor: pointer;
             font-size: 0.85rem;
         }
+        .btn:hover { opacity: 0.9; }
 
         .btn-secondary {
             background-color: var(--card-border);
@@ -626,12 +642,12 @@
 
     <header class="dashboard-header">
         <div class="title-area">
-            <h1>Master GCSE Planner[cite: 1]</h1>
+            <h1>Master GCSE Revision Planner (May 7th, 2027)[cite: 1]</h1>
             <p>Smart Test Rearrangement & iPhone X Layout[cite: 1]</p>
         </div>
         <div class="header-widgets">
             <button class="theme-toggle-btn" onclick="toggleTheme()">
-                <span id="theme-icon">🌙</span> <span id="theme-text">Dark</span>
+                <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
             </button>
             <div class="streak-card">
                 <div class="streak-count" id="streak-count">🔥 0</div>
@@ -641,7 +657,7 @@
                 <div class="countdown-digits">
                     <div class="digit-unit"><span id="cd-days">--</span><span class="sub">Days</span></div>
                     <div>:</div>
-                    <div class="digit-unit"><span id="cd-hours">--</span><span class="sub">Hrs</span></div>
+                    <div class="digit-unit"><span id="cd-hours">--</span><span class="sub">Hours</span></div>
                     <div>:</div>
                     <div class="digit-unit"><span id="cd-mins">--</span><span class="sub">Mins</span></div>
                 </div>
@@ -668,7 +684,7 @@
                 </div>
                 <div class="input-group" style="align-items: center;">
                     <label for="holiday-mode-toggle" style="color: var(--accent-amber); font-weight: bold;">Holiday</label>
-                    <input type="checkbox" id="holiday-mode-toggle" onchange="toggleHolidayMode()" style="width: 22px; height: 22px; cursor: pointer;">
+                    <input type="checkbox" id="holiday-mode-toggle" onchange="toggleHolidayMode()" style="width: 20px; height: 20px; cursor: pointer;">
                 </div>
             </div>
 
@@ -744,87 +760,30 @@
 
         const defaultDatabase = [
             {
-                id: 'maths',
-                name: 'GCSE Mathematics',
-                examBoard: 'Edexcel',
-                confidence: 2,
-                testScore: 50,
-                testDate: '',
-                noTest: false,
-                lessons: [
-                    "Lesson 1: Operations, prime factor decomposition & LCM/HCF.",
-                    "Lesson 2: Index laws, standard form & surds simplification.",
-                    "Lesson 3: Expanding double brackets & factorising quadratics.",
-                    "Lesson 4: Algebraic fractions and linear inequalities.",
-                    "Lesson 5: Coordinate geometry & equation of circles.",
-                    "Lesson 6: Quadratic formula, completing the square & iterative methods.",
-                    "Lesson 7: Direct & inverse proportion, compound measures.",
-                    "Lesson 8: Pythagoras theorem & trigonometry (SOH CAH TOA, Sine/Cosine rules).",
-                    "Lesson 9: Circle theorems proof and geometric reasoning.",
-                    "Lesson 10: Probability trees, Venn diagrams and cumulative frequency graphs."
-                ]
-            },
-            {
-                id: 'biology',
-                name: 'GCSE Biology',
+                id: 'eng_lang',
+                name: 'GCSE English Language',
                 examBoard: 'AQA',
-                confidence: 2,
-                testScore: 55,
+                confidence: 3,
+                testScore: 65,
                 testDate: '',
                 noTest: false,
                 lessons: [
-                    "Lesson 1: Eukaryotic vs prokaryotic cells & microscopy calculations.",
-                    "Lesson 2: Transport in cells: Diffusion, osmosis & active transport.",
-                    "Lesson 3: Digestive system enzymes & required practical food tests.",
-                    "Lesson 4: Heart structure, blood vessels & cardiovascular disease.",
-                    "Lesson 5: Communicable diseases, defense systems & vaccinations.",
-                    "Lesson 6: Photosynthesis limiting factors & plant respiration.",
-                    "Lesson 7: Homeostasis, reflex arcs & the endocrine system.",
-                    "Lesson 8: DNA structure, protein synthesis & meiosis cell division.",
-                    "Lesson 9: Monohybrid crosses, Punnett squares & genetic disorders.",
-                    "Lesson 10: Natural selection, evolution and biodiversity ecosystems."
-                ]
-            },
-            {
-                id: 'chemistry',
-                name: 'GCSE Chemistry',
-                examBoard: 'AQA',
-                confidence: 1,
-                testScore: 45,
-                testDate: '',
-                noTest: false,
-                lessons: [
-                    "Lesson 1: Atomic structure, isotopes & periodic table trends.",
-                    "Lesson 2: Ionic, covalent & metallic bonding properties.",
-                    "Lesson 3: Quantitative chemistry: Relative formula mass & moles calculation.",
-                    "Lesson 4: Titrations required practical & concentration formulas.",
-                    "Lesson 5: Reactivity series, extraction of metals & oxidation/reduction.",
-                    "Lesson 6: Electrolysis of molten & aqueous ionic compounds.",
-                    "Lesson 7: Energy changes: Exothermic/endothermic reaction profiles.",
-                    "Lesson 8: Factors affecting reaction rates & collision theory.",
-                    "Lesson 9: Reversible reactions & Le Chatelier's dynamic equilibrium.",
-                    "Lesson 10: Organic chemistry: Fractional distillation, cracking & alkanes."
-                ]
-            },
-            {
-                id: 'physics',
-                name: 'GCSE Physics',
-                examBoard: 'AQA',
-                confidence: 2,
-                testScore: 50,
-                testDate: '',
-                noTest: false,
-                lessons: [
-                    "Lesson 1: Energy stores, pathways, conservation & efficiency.",
-                    "Lesson 2: Electric circuits: Current, potential difference, resistance & Ohm's Law.",
-                    "Lesson 3: Mains electricity, National Grid & safety plugs.",
-                    "Lesson 4: Particle model of matter: Density, specific heat capacity & latent heat.",
-                    "Lesson 5: Atomic structure & radioactive decay equations (alpha, beta, gamma).",
-                    "Lesson 6: Forces: Resultant forces, Hooke's Law & moments.",
-                    "Lesson 7: Motion: Distance-time graphs, acceleration & terminal velocity.",
-                    "Lesson 8: Wave properties, transverse/longitudinal waves & wave speed equation.",
-                    "Lesson 9: Electromagnetic spectrum uses and hazards.",
-                    "Lesson 10: Magnetism, electromagnetism & generator/motor effect."
+                    "Lesson 1: Navigating unseen 21st-century fiction extracts (active reading and annotation).",
+                    "Lesson 2: Explicit vs. implicit information retrieval (4-mark speed strategies).",
+                    "Lesson 3: Analyzing language features, imagery, and word choice.",
+                    "Lesson 4: Structural analysis: Pacing, shifts in focus, and narrative perspectives.",
+                    "Lesson 5: Building a critical evaluation argument (answering 'To what extent do you agree?').",
+                    "Lesson 6: Crafting descriptive prose: Sensory details, figurative language, and spatial framing.",
+                    "Lesson 7: Plotting narrative architecture: Dynamic character arcs and effective climax resolution.",
+                    "Lesson 8: Unpacking non-fiction genres across eras (19th vs. 20th/21st century).",
+                    "Lesson 9: Synthesizing ideas and summarizing implicit differences across texts.",
+                    "Lesson 10: Comparative language analysis in persuasive and reflective non-fiction.",
+                    "Lesson 11: Comparative evaluation of contrasting viewpoints and attitudes.",
+                    "Lesson 12: Formatting persuasive forms: Speeches, formal letters, articles, and leaflets.",
+                    "Lesson 13: Rhetorical strategies: DAFOREST, tone manipulation, and counter-argumentation.",
+                    "Lesson 14: Choosing topics and structuring a formal spoken presentation.",
+                    "Lesson 15: Vocal delivery, standard English fluency, and non-verbal communication.",
+                    "Lesson 16: Fielding audience questions and managing spontaneous responses."
                 ]
             },
             {
@@ -836,12 +795,313 @@
                 testDate: '',
                 noTest: false,
                 lessons: [
-                    "Lesson 1: Shakespearean extract analysis & thematic structure.",
-                    "Lesson 2: Macbeth/Romeo and Juliet character arcs and historical context.",
-                    "Lesson 3: 19th-Century novel (A Christmas Carol/Jekyll & Hyde) motifs.",
-                    "Lesson 4: Modern text character dynamics and social contexts.",
-                    "Lesson 5: Power and conflict poetry cluster analysis & comparison.",
-                    "Lesson 6: Unseen poetry structural and linguistic decoding."
+                    "Lesson 17: Extract analysis: Deconstructing Shakespearean language, meter, and imagery.",
+                    "Lesson 18: Shakespeare whole-text thematic links and context integration.",
+                    "Lesson 19: Shakespeare character transformations and dramatic function.",
+                    "Lesson 20: 19th-Century novel: Extract analysis and thematic motifs.",
+                    "Lesson 21: Historical, social, and cultural contexts in 19th-century literature.",
+                    "Lesson 22: Structuring comparative thesis statements and extract-to-whole-text essays.",
+                    "Lesson 23: Modern prose/drama: Character dynamics and socio-political themes.",
+                    "Lesson 24: Dramatic devices, staging, and structural choices in modern drama.",
+                    "Lesson 25: Poetry anthology cluster analysis: Theme identification and key quotes.",
+                    "Lesson 26: Pairing anthology poems: Comparative structure and language techniques.",
+                    "Lesson 27: Unseen poetry analysis: Decoding meaning, form, and tone under timed conditions.",
+                    "Lesson 28: Comparative unseen poetry: Linking structure, theme, and language across two poems."
+                ]
+            },
+            {
+                id: 'maths',
+                name: 'GCSE Mathematics',
+                examBoard: 'Edexcel',
+                confidence: 2,
+                testScore: 50,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 29: Operations, place value, and prime factor decomposition.",
+                    "Lesson 30: Highest Common Factor (HCF) and Lowest Common Multiple (LCM) applications.",
+                    "Lesson 31: Laws of indices (fractional, negative, zero) and standard form calculations.",
+                    "Lesson 32: Surds simplification, expanding brackets, and rationalizing denominators.",
+                    "Lesson 33: Converting recurring decimals to fractions algebraically.",
+                    "Lesson 34: Upper and lower bounds, truncation, and error intervals.",
+                    "Lesson 35: Product Rule for Counting and combinatorics problems.",
+                    "Lesson 36: Expanding double/triple brackets and factorizing quadratics (a=1 and a>1).",
+                    "Lesson 37: Simplifying, adding, subtracting, and solving algebraic fractions.",
+                    "Lesson 38: Linear, quadratic, and simultaneous inequalities (shaded graphical regions).",
+                    "Lesson 39: Coordinate geometry: Linear, quadratic, cubic, reciprocal, and exponential graphs.",
+                    "Lesson 40: Circle equations (x² + y² = r²) and calculating tangents to circles.",
+                    "Lesson 41: Completing the square to identify turning points and symmetry lines.",
+                    "Lesson 42: Parallel gradients (m1 = m2) and perpendicular gradients (m1 m2 = -1).",
+                    "Lesson 43: Arithmetic, geometric, quadratic, and special sequences (nth term formulas).",
+                    "Lesson 44: Functions: Notation, domain/range, composite functions f(g(x)), and inverse functions f⁻¹(x).",
+                    "Lesson 45: Numerical root-finding, iteration formulas, and convergence testing.",
+                    "Lesson 46: Ratios, sharing in parts, and scale factors.",
+                    "Lesson 47: Direct and inverse proportion equations (y ∝ x, y ∝ 1/x).",
+                    "Lesson 48: Compound measures: Speed, density, pressure, and unit conversions.",
+                    "Lesson 49: Percentage change, reverse percentages, compound interest, and depreciation.",
+                    "Lesson 50: Instantaneous rate of change: Estimating gradients on non-linear curves using tangents.",
+                    "Lesson 51: Estimating area under non-linear velocity-time graphs using trapeziums.",
+                    "Lesson 52: Angle facts, parallel lines, polygon interior/exterior angles.",
+                    "Lesson 53: Loci and compass constructions (perpendicular bisectors, angle bisectors).",
+                    "Lesson 54: Arc length, sector area, and segment area calculations.",
+                    "Lesson 55: 2D/3D transformations: Translation, reflection, rotation, and negative/fractional enlargements.",
+                    "Lesson 56: Advanced Pythagoras and SOH CAH TOA in 2D and 3D shapes.",
+                    "Lesson 57: Non-right-angled trigonometry: Sine rule, cosine rule, and Area = ½ab sin(C).",
+                    "Lesson 58: Vector arithmetic, column vectors, and geometric vector proofs.",
+                    "Lesson 59: Circle theorems: Proofs and geometric problem-solving.",
+                    "Lesson 60: Theoretical probability, relative frequency, and Venn diagrams.",
+                    "Lesson 61: Tree diagrams: Independent, dependent, and conditional events.",
+                    "Lesson 62: Frequency tables, mean, median, mode, and range from grouped data.",
+                    "Lesson 63: Scatter graphs, line of best fit, correlation, and interpolation vs. extrapolation.",
+                    "Lesson 64: Cumulative frequency curves, box plots, and interquartile range (IQR).",
+                    "Lesson 65: Histograms: Calculating frequency density and estimating statistics from bars."
+                ]
+            },
+            {
+                id: 'biology',
+                name: 'GCSE Biology',
+                examBoard: 'AQA',
+                confidence: 2,
+                testScore: 55,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 66: Eukaryotic vs. prokaryotic cell architecture and specialized adaptations.",
+                    "Lesson 67: Light and electron microscopy: Magnification calculations and scale bars.",
+                    "Lesson 68: Mitosis, the cell cycle, and stem cell differentiation/ethics.",
+                    "Lesson 69: Transport mechanisms: Diffusion, osmosis (required practical), and active transport.",
+                    "Lesson 70: Culturing microorganisms: Aseptic techniques, agar plates, and inhibition zones.",
+                    "Lesson 71: Digestive organs, mechanical digestion, and enzyme Lock-and-Key models.",
+                    "Lesson 72: Required Practical: Food tests (Benedict's, Iodine, Biuret, Ethanol).",
+                    "Lesson 73: Human circulatory system: Heart structure, blood components, and blood vessels.",
+                    "Lesson 74: Coronary heart disease, cardiovascular treatments, and non-communicable lifestyle factors.",
+                    "Lesson 75: Plant tissues, stomatal control, transpiration, and translocation mechanisms.",
+                    "Lesson 76: Pathogens: Viral, bacterial, fungal, and protist diseases.",
+                    "Lesson 77: Human physical and chemical defence systems against pathogens.",
+                    "Lesson 78: Vaccination, immunity, antibiotics, painkillers, and antibiotic resistance.",
+                    "Lesson 79: Drug discovery: Historical sources, modern testing (pre-clinical and clinical trials).",
+                    "Lesson 80: Monoclonal antibodies: Production steps and clinical/diagnostic applications.",
+                    "Lesson 81: Plant disease identification, deficiency symptoms, and defence mechanisms.",
+                    "Lesson 82: Photosynthesis equation, limiting factors, and rate calculations.",
+                    "Lesson 83: Uses of glucose in plants and bioenergetics practicals.",
+                    "Lesson 84: Aerobic vs. anaerobic respiration in humans and yeast (fermentation).",
+                    "Lesson 85: Human exercise response: Oxygen debt, lactic acid removal, and metabolism.",
+                    "Lesson 86: Principles of homeostasis, nervous system structure, and reflex arcs.",
+                    "Lesson 87: Human brain anatomy, functions, and investigation methods.",
+                    "Lesson 88: Eye anatomy, accommodation, and vision defect corrections (myopia/hyperopia).",
+                    "Lesson 89: Thermoregulation: Vasodilation, vasoconstriction, and feedback loops.",
+                    "Lesson 90: Endocrine system: Blood glucose control, diabetes (Type 1 and Type 2), and negative feedback.",
+                    "Lesson 91: Osmoregulation: Kidneys, filtration, reabsorption, dialysis, and kidney transplants.",
+                    "Lesson 92: Reproductive hormones, menstrual cycle feedback, and contraception methods.",
+                    "Lesson 93: Plant hormones: Auxins, phototropism, gravitropism, ethene, and gibberellins.",
+                    "Lesson 94: Sexual vs. asexual reproduction, meiosis, and gamete formation.",
+                    "Lesson 95: DNA double-helix structure, nucleotide architecture, and protein synthesis basics.",
+                    "Lesson 96: Monohybrid inheritance, Punnett squares, genetic terminology, and inherited disorders.",
+                    "Lesson 97: Genetic variation, environmental factors, and Darwinian natural selection.",
+                    "Lesson 98: Selective breeding, genetic engineering steps, and cloning techniques.",
+                    "Lesson 99: Fossil evidence, evolutionary trees, extinction, and speciation mechanisms.",
+                    "Lesson 100: Carl Linnaeus and Carl Woese (Three-Domain) classification systems.",
+                    "Lesson 101: Ecosystems: Abiotic/biotic factors, adaptations, and trophic levels.",
+                    "Lesson 102: Material cycles: Carbon cycle, water cycle, and decomposition factors.",
+                    "Lesson 103: Biodiversity, global warming, deforestation, and land use impacts.",
+                    "Lesson 104: Food security factors, sustainable fishing, and biotechnology in farming."
+                ]
+            },
+            {
+                id: 'chemistry',
+                name: 'GCSE Chemistry',
+                examBoard: 'AQA',
+                confidence: 1,
+                testScore: 42,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 105: Elements, compounds, mixtures, and physical separation techniques.",
+                    "Lesson 106: Historical models of the atom (Dalton, Thomson, Rutherford, Bohr, Chadwick).",
+                    "Lesson 107: Subatomic particles, isotopes, electron configurations, and periodic trends.",
+                    "Lesson 108: Periodic table groups: Group 1 (Alkali Metals), Group 7 (Halogens), Group 0, and Transition Metals.",
+                    "Lesson 109: Ionic bonding, dot-and-cross diagrams, and giant ionic lattices.",
+                    "Lesson 110: Covalent bonding: Simple molecules and giant covalent structures (Diamond, Graphite, Graphene, Fullerenes).",
+                    "Lesson 111: Metallic bonding, delocalized electrons, thermal/electrical conductivity, and alloys.",
+                    "Lesson 112: Polymer structures, smart materials, and properties of nanoparticles.",
+                    "Lesson 113: Relative formula mass (Mr), law of conservation of mass, and percentage composition.",
+                    "Lesson 114: Mole concept, Avogadro's constant, and reacting mass calculations.",
+                    "Lesson 115: Limiting reactants, percentage yield, and atom economy calculations.",
+                    "Lesson 116: Solutions: Molar concentrations (g/dm³ and mol/dm³).",
+                    "Lesson 117: Molar gas volumes (24 dm³ rule) and stoichiometry.",
+                    "Lesson 118: Required Practical: Titration procedures and volumetric calculations.",
+                    "Lesson 119: Reactivity series, displacement reactions, oxidation/reduction (OIL RIG).",
+                    "Lesson 120: Extracting metals using carbon vs. industrial electrolysis.",
+                    "Lesson 121: Acid reactions with metals, bases, and carbonates; pH scale and neutralization equations.",
+                    "Lesson 122: Electrolysis of molten salts and aqueous solutions (half-equations).",
+                    "Lesson 123: Exothermic vs. endothermic reactions, reaction profiles, and bond energy calculations.",
+                    "Lesson 124: Chemical cells, batteries, and hydrogen fuel cell operation.",
+                    "Lesson 125: Collision theory, activation energy, and factors affecting reaction rates.",
+                    "Lesson 126: Measuring rates of reaction (Required Practical skills and graphs).",
+                    "Lesson 127: Catalysts: Action mechanism and economic/environmental importance.",
+                    "Lesson 128: Reversible reactions, dynamic equilibrium, and Le Chatelier’s Principle.",
+                    "Lesson 129: Crude oil fractional distillation, alkanes, and combustion reactions.",
+                    "Lesson 130: Catalytic/steam cracking and alkene tests (Bromine water).",
+                    "Lesson 131: Reactions of alkenes, functional groups, alcohols, and carboxylic acids.",
+                    "Lesson 132: Addition vs. condensation polymerization (polyesters, proteins, DNA).",
+                    "Lesson 133: Chemical analysis: Pure vs. formulation, chromatography (Rf values).",
+                    "Lesson 134: Gas tests (O2, H2, CO2, Cl2) and ion testing (flame tests, precipitates, spectroscopy).",
+                    "Lesson 135: Evolution of Earth’s atmosphere and the greenhouse effect.",
+                    "Lesson 136: Climate change, carbon footprints, and atmospheric pollutants (CO, SO2, NOx, particulates).",
+                    "Lesson 137: Potable water production, desalination, and municipal wastewater treatment.",
+                    "Lesson 138: Life Cycle Assessments (LCAs), recycling metals/plastics, and phytomining/bioleaching.",
+                    "Lesson 139: Industrial processes: Haber process conditions (NH3) and NPK fertilizers."
+                ]
+            },
+            {
+                id: 'physics',
+                name: 'GCSE Physics',
+                examBoard: 'AQA',
+                confidence: 2,
+                testScore: 50,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 140: Energy stores, pathways, conservation of energy, and sankey diagrams.",
+                    "Lesson 141: Work done, kinetic energy (Ek = ½mv²), and gravitational potential energy (Ep = mgh).",
+                    "Lesson 142: Power, efficiency calculations, and thermal insulation (Required Practical).",
+                    "Lesson 143: Electric current, potential difference, resistance, and Ohm's Law.",
+                    "Lesson 144: Series and parallel circuit rules and IV characteristic graphs (resistor, lamp, diode).",
+                    "Lesson 145: LDRs, thermistors, sensing circuits, AC vs. DC, and 3-pin plug safety.",
+                    "Lesson 146: Electrical power (P=VI, P=I²R), energy transfer (E=Pt, E=QV), and National Grid transformers.",
+                    "Lesson 147: Static electricity: Electric fields, charge transfer, and electrostatic forces.",
+                    "Lesson 148: Density of solids, liquids, gases (Required Practical calculation methods).",
+                    "Lesson 149: Internal energy, specific heat capacity (Q=mcΔT), and specific latent heat (Q=mL).",
+                    "Lesson 150: Particle motion in gases, temperature, and Boyles Law (pV = constant).",
+                    "Lesson 151: History of atomic models (Plum Pudding to Bohr) and nuclear structure.",
+                    "Lesson 152: Radioactive decay types (α, β, γ, neutron), balancing nuclear equations.",
+                    "Lesson 153: Half-life calculations, decay curves, contamination vs. irradiation.",
+                    "Lesson 154: Uses of radiation, medical tracers, nuclear fission, and nuclear fusion.",
+                    "Lesson 155: Scalar vs. vector quantities, contact vs. non-contact forces, gravity, and weight.",
+                    "Lesson 156: Resultant forces, free-body diagrams, and work done during movement.",
+                    "Lesson 157: Hooke’s Law, elastic potential energy, and force-extension practicals.",
+                    "Lesson 158: Moments, levers, gear systems, fluid pressure, and atmospheric depth.",
+                    "Lesson 159: Motion graphs: Distance-time and velocity-time (calculating acceleration and distance).",
+                    "Lesson 160: Newton’s Laws of Motion and terminal velocity.",
+                    "Lesson 161: Stopping distances: Thinking distance, braking distance, and factors affecting both.",
+                    "Lesson 162: Momentum (p=mv), conservation of momentum, and safety features.",
+                    "Lesson 163: Transverse vs. longitudinal waves, wave speed formula (v=fλ).",
+                    "Lesson 164: Reflection, refraction, ray diagrams, and wave practicals.",
+                    "Lesson 165: Sound waves, ultrasound applications, and seismic P/S wave analysis.",
+                    "Lesson 166: Electromagnetic spectrum properties, uses, and hazard analysis.",
+                    "Lesson 167: Lenses: Convex and concave ray diagrams, real vs. virtual image formation, magnification.",
+                    "Lesson 168: Black body radiation: Absorption, emission, and Earth's energy balance.",
+                    "Lesson 169: Magnetic fields, solenoids, electromagnet construction, and applications.",
+                    "Lesson 170: Motor effect, Fleming’s Left-Hand Rule, and DC electric motor operation.",
+                    "Lesson 171: Generator effect (electromagnetic induction), alternators, dynamos, and microphones.",
+                    "Lesson 172: Transformers: Voltage/turns ratio (Vp/Vs = Np/Ns) and power conservation.",
+                    "Lesson 173: Solar System structure, orbital mechanics, and satellite speed/radius stability.",
+                    "Lesson 174: Life cycle of main sequence, massive, and low-mass stars.",
+                    "Lesson 175: Red-shift, Doppler effect, expanding universe, and Big Bang evidence."
+                ]
+            },
+            {
+                id: 'geography',
+                name: 'GCSE Geography',
+                examBoard: 'AQA',
+                confidence: 3,
+                testScore: 68,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 176: Tectonic hazards: Earthquakes, volcanic eruptions, monitoring, and management.",
+                    "Lesson 177: Tropical storms: Formation, distribution, and case study impacts/responses.",
+                    "Lesson 178: Extreme UK weather events, evidence of global climate change, and mitigation/adaptation.",
+                    "Lesson 179: Ecosystems structure, nutrient cycles, tropical rainforest deforestation case study.",
+                    "Lesson 180: Hot deserts OR cold environments: Characteristics, development opportunities, and management.",
+                    "Lesson 181: Physical landscapes: Coastal processes (erosion, transportation, deposition) and landforms.",
+                    "Lesson 182: River processes, valley profiles, erosional/depositional landforms, and flood management.",
+                    "Lesson 183: Global urbanization trends, megacities, and LIC/NEE urban growth case study.",
+                    "Lesson 184: Major UK city case study: Regeneration, challenges, and environmental solutions.",
+                    "Lesson 185: Sustainable urban living: Energy, water, waste, and green space management.",
+                    "Lesson 186: Global development gap: Demographic indicators, cause of uneven development, and strategies.",
+                    "Lesson 187: Rapid economic growth case study in an LIC/NEE and changing UK economy structures.",
+                    "Lesson 188: Global resource management: Food, water, and energy distribution and security options.",
+                    "Lesson 189: Issue evaluation: Analyzing pre-release materials and framing geographical arguments.",
+                    "Lesson 190: Primary physical fieldwork: Data collection, risk assessments, and presentation methods.",
+                    "Lesson 191: Primary human fieldwork: Sampling strategies, data synthesis, and evaluation.",
+                    "Lesson 192: Unseen map skills, OS map reading, grid references, and statistical data extraction."
+                ]
+            },
+            {
+                id: 'german',
+                name: 'GCSE German',
+                examBoard: 'AQA',
+                confidence: 4,
+                testScore: 75,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 193: Me, my family, relationships, technology in everyday life, and social media.",
+                    "Lesson 194: Free-time activities, music, cinema, sports, and cultural celebrations.",
+                    "Lesson 195: Home area, local region, environmental issues, and global sustainable initiatives.",
+                    "Lesson 196: Travel, tourism, school life, post-16 education pathways, and career ambitions.",
+                    "Lesson 197: Listening strategies: Identifying key information, distractors, and negative forms.",
+                    "Lesson 198: Speaking skills: Role-play mechanics, photo card descriptors, and spontaneous conversation.",
+                    "Lesson 199: Noun cases: Nominative, Accusative, Dative, and Genitive article endings.",
+                    "Lesson 200: Word order rules: Verb-second rule (V2), inversion, and subordinate clauses (verb-final).",
+                    "Lesson 201: Tense mastery: Present, Perfect, Imperfect, Future, and Conditional tenses.",
+                    "Lesson 202: Modals, prepositions (Accusative, Dative, Two-Way), and translation strategies (both directions)."
+                ]
+            },
+            {
+                id: 'music',
+                name: 'GCSE Music',
+                examBoard: 'Edexcel',
+                confidence: 4,
+                testScore: 80,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 203: Solo performance preparation: Technical accuracy, rhythm, and pitch expression.",
+                    "Lesson 204: Ensemble performance: Balance, timing, coordination, and stylistic interpretation.",
+                    "Lesson 205: Composition to a brief: Responding to stylistic constraints and instrumentation.",
+                    "Lesson 206: Free composition: Developing melodic ideas, harmony, and structural contrast.",
+                    "Lesson 207: DAW / Notation software production: Arranging, dynamics, mixing, and scores.",
+                    "Lesson 208: Area of Study 1: Instrumental Music 1700–1820 (Set work analysis, sonata form, Baroque/Classical styles).",
+                    "Lesson 209: Area of Study 2: Vocal Music (Set work analysis, word painting, vocal settings).",
+                    "Lesson 210: Area of Study 3: Music for Stage & Screen (Film scoring techniques, leitmotifs, musical theatre).",
+                    "Lesson 211: Area of Study 4: Fusions (Combining musical traditions, world rhythms, pop integration).",
+                    "Lesson 212: Ear training: Melodic/rhythmic dictation, chord identification, and unfamiliar listening techniques.",
+                    "Lesson 213: Extended comparative essay response: Set works vs. unfamiliar musical extracts."
+                ]
+            },
+            {
+                id: 'cs',
+                name: 'GCSE Computer Science',
+                examBoard: 'OCR',
+                confidence: 4,
+                testScore: 82,
+                testDate: '',
+                noTest: false,
+                lessons: [
+                    "Lesson 214: CPU architecture: Von Neumann architecture, ALU, Control Unit, and registers (MAR, MDR, PC, ACC).",
+                    "Lesson 215: CPU performance factors: Clock speed, cache size, number of cores, and fetch-decode-execute cycle.",
+                    "Lesson 216: Memory: RAM, ROM, virtual memory, and flash memory.",
+                    "Lesson 217: Secondary storage types: Optical, magnetic, solid state (speed, capacity, durability, portability).",
+                    "Lesson 218: Networks: LAN, WAN, topologes (Star, Mesh), hardware (routers, switches, NICs).",
+                    "Lesson 219: Network protocols and layers: TCP/IP, HTTP, HTTPS, FTP, POP, IMAP, SMTP, Ethernet, Wi-Fi.",
+                    "Lesson 220: Network security threats and prevention (malware, phishing, brute force, firewalls, encryption).",
+                    "Lesson 221: Systems software: Operating system functions (user interface, memory management, multitasking) and utility software.",
+                    "Lesson 222: Ethical, legal, cultural, and environmental impacts of technology (Data Protection Act, Computer Misuse Act).",
+                    "Lesson 223: Computational thinking: Abstraction, decomposition, algorithmic thinking, and flowcharts.",
+                    "Lesson 224: Searching algorithms: Linear search vs. binary search (trace tables and efficiency).",
+                    "Lesson 225: Sorting algorithms: Bubble sort, insertion sort, and merge sort.",
+                    "Lesson 226: Programming constructs: Sequence, selection, iteration (count-controlled and condition-controlled).",
+                    "Lesson 227: Data structures: Variables, constants, 1D and 2D arrays, string manipulation.",
+                    "Lesson 228: Subprograms: Procedures, functions, parameters, local vs. global scope.",
+                    "Lesson 229: Defensive design: Input validation, maintainability, syntax vs. logic errors, and testing strategies.",
+                    "Lesson 230: Logic gates: AND, OR, NOT, logic circuits, and truth tables.",
+                    "Lesson 231: Units and binary representation: Bits, bytes, binary arithmetic, binary shifts, and hexadecimal conversion.",
+                    "Lesson 232: Advanced binary: Two's complement representation for negative numbers and overflow error handling.",
+                    "Lesson 233: Character sets: ASCII vs. Unicode (bit depth and character mapping).",
+                    "Lesson 234: Media representation: Bitmaps (color depth, resolution, file size) and audio (sampling rate, bit depth).",
+                    "Lesson 235: Compression techniques: Lossy vs. lossless compression methods."
                 ]
             }
         ];
@@ -873,7 +1133,7 @@
         function updateThemeButtonUI() {
             const isDark = currentTheme === 'dark';
             document.getElementById('theme-icon').innerText = isDark ? '🌙' : '☀️';
-            document.getElementById('theme-text').innerText = isDark ? 'Dark' : 'Light';
+            document.getElementById('theme-text').innerText = isDark ? 'Dark Mode' : 'Light Mode';
         }
 
         function showToast(message) {
@@ -884,6 +1144,7 @@
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
@@ -907,7 +1168,7 @@
 
         function triggerConfetti() {
             try {
-                confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
             } catch(e) {}
         }
 
@@ -924,16 +1185,19 @@
                 document.getElementById('cd-days').innerText = '00';
                 document.getElementById('cd-hours').innerText = '00';
                 document.getElementById('cd-mins').innerText = '00';
+                document.getElementById('cd-secs').innerText = '00';
                 return;
             }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
             document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
             document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
             document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
+            document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
         }
 
         function saveData() {
@@ -949,15 +1213,36 @@
         }
 
         function updateStreakDisplay() {
+            const todayStr = new Date().toDateString();
+            if (streakData.lastCompletedDate) {
+                const lastDate = new Date(streakData.lastCompletedDate);
+                const diffTime = Math.abs(new Date(todayStr) - new Date(lastDate.toDateString()));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 1) {
+                    streakData.currentStreak = 0;
+                }
+            }
             document.getElementById('streak-count').innerText = `🔥 ${streakData.currentStreak}`;
         }
 
         function recordStreakCompletion() {
             const todayStr = new Date().toDateString();
             if (streakData.lastCompletedDate !== todayStr) {
-                streakData.currentStreak = (streakData.currentStreak || 0) + 1;
+                if (!streakData.lastCompletedDate) {
+                    streakData.currentStreak = 1;
+                } else {
+                    const lastDate = new Date(streakData.lastCompletedDate);
+                    const diffTime = Math.abs(new Date(todayStr) - new Date(lastDate.toDateString()));
+                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) {
+                        streakData.currentStreak++;
+                    } else if (diffDays > 1) {
+                        streakData.currentStreak = 1;
+                    }
+                }
                 streakData.lastCompletedDate = todayStr;
                 triggerConfetti();
+                showToast(`🔥 Streak updated! Day ${streakData.currentStreak} reached!`);
                 saveData();
             }
         }
@@ -966,29 +1251,33 @@
             isOnHoliday = document.getElementById('holiday-mode-toggle').checked;
             saveData();
             generateSchedule();
-            showToast(isOnHoliday ? '🏖️ Holiday Mode Active' : '📚 Revision Resumed');
+            showToast(isOnHoliday ? '🏖️ Holiday Mode Activated' : '📚 Holiday Mode Deactivated');
         }
 
         function calculateWeights() {
             const now = new Date().getTime();
+
             subjects.forEach(sub => {
                 let scoreWeight = 0;
                 let testUrgencyWeight = 0;
-                const confWeight = (5 - sub.confidence) * 12;
+                const confWeight = (5 - sub.confidence) * 10 * 0.3;
 
                 if (!sub.noTest) {
-                    scoreWeight = (100 - sub.testScore) * 0.6;
+                    scoreWeight = (100 - sub.testScore) * 0.5;
+
                     if (sub.testDate) {
                         const testTime = new Date(sub.testDate).getTime();
                         const daysUntilTest = (testTime - now) / (1000 * 60 * 60 * 24);
                         if (daysUntilTest > 0 && daysUntilTest <= 21) {
-                            // Smarter test rearrangement: massive weight spike for tests within 3 weeks!
-                            testUrgencyWeight = (21 - daysUntilTest) * 4.5;
+                            // Smarter test rearrangement: massive priority boost for tests coming up within 3 weeks
+                            testUrgencyWeight = (21 - daysUntilTest) * 3.5;
                         }
                     }
                 }
+
                 sub.weight = scoreWeight + confWeight + testUrgencyWeight;
             });
+
             subjects.sort((a, b) => b.weight - a.weight);
         }
 
@@ -998,7 +1287,9 @@
             let completedCount = 0;
             sub.lessons.forEach((_, idx) => {
                 Object.keys(completedLessons).forEach(key => {
-                    if (key.startsWith(`${sub.id}_${idx}_`)) completedCount++;
+                    if (key.startsWith(`${sub.id}_${idx}_`)) {
+                        completedCount++;
+                    }
                 });
             });
             return Math.min(100, Math.round((completedCount / total) * 100));
@@ -1008,22 +1299,37 @@
             const titleInput = document.getElementById('new-task-title');
             const dateInput = document.getElementById('new-task-date');
             const title = titleInput.value.trim();
-            if (!title) return;
+            const dueDate = dateInput.value;
 
-            customTasks.push({ id: 'task_' + Date.now(), title, dueDate: dateInput.value || '', completed: false });
+            if (!title) {
+                showToast('⚠️ Please enter a task title');
+                return;
+            }
+
+            const newTask = {
+                id: 'task_' + Date.now(),
+                title: title,
+                dueDate: dueDate || '',
+                completed: false
+            };
+
+            customTasks.push(newTask);
             titleInput.value = '';
             dateInput.value = '';
             saveData();
             renderCustomTasks();
             generateSchedule();
-            showToast('✅ Task added');
+            showToast('✅ Task added to schedule & tracker!');
         }
 
         function toggleCustomTask(taskId) {
             const task = customTasks.find(t => t.id === taskId);
             if (task) {
                 task.completed = !task.completed;
-                if (task.completed) recordStreakCompletion();
+                if (task.completed) {
+                    recordStreakCompletion();
+                    showToast('🎉 Task completed!');
+                }
                 saveData();
                 renderCustomTasks();
                 generateSchedule();
@@ -1035,25 +1341,30 @@
             saveData();
             renderCustomTasks();
             generateSchedule();
+            showToast('🗑️ Task removed');
         }
 
         function renderCustomTasks() {
             const container = document.getElementById('custom-tasks-list');
             if (!container) return;
             container.innerHTML = '';
+
             if (customTasks.length === 0) {
-                container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">No active custom tasks.</div>`;
+                container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 4px;">No active custom tasks or homework.</div>`;
                 return;
             }
+
             customTasks.forEach(task => {
                 const item = document.createElement('div');
-                item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--card-border); font-size: 0.8rem;';
+                item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 8px; border-radius: 6px; border: 1px solid var(--card-border); font-size: 0.8rem;';
+                const dueText = task.dueDate ? ` <span style="font-size: 0.7rem; color: var(--accent-amber);">(${task.dueDate})</span>` : '';
+                
                 item.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
-                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleCustomTask('${task.id}')" style="cursor: pointer;">
-                        <span style="${task.completed ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${task.title}</span>
+                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleCustomTask('${task.id}')" style="cursor: pointer; width: 14px; height: 14px;">
+                        <span style="${task.completed ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${task.title}${dueText}</span>
                     </div>
-                    <button onclick="deleteCustomTask('${task.id}')" style="background:none; border:none; color:var(--accent-red); cursor:pointer;">✕</button>
+                    <button onclick="deleteCustomTask('${task.id}')" style="background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 0.8rem;" title="Delete task">✕</button>
                 `;
                 container.appendChild(item);
             });
@@ -1065,8 +1376,17 @@
             container.innerHTML = '';
 
             subjects.forEach(sub => {
-                let priorityClass = sub.weight > 60 ? 'priority-high' : (sub.weight > 30 ? 'priority-med' : 'priority-low');
-                let priorityLabel = sub.weight > 60 ? 'High Focus' : (sub.weight > 30 ? 'Medium' : 'Stable');
+                let priorityClass = 'priority-low';
+                let priorityLabel = 'Low Priority';
+
+                if (sub.weight > 50) {
+                    priorityClass = 'priority-high';
+                    priorityLabel = 'High Priority';
+                } else if (sub.weight > 30) {
+                    priorityClass = 'priority-med';
+                    priorityLabel = 'Med Priority';
+                }
+
                 const progressPct = getSubjectProgress(sub);
 
                 const card = document.createElement('div');
@@ -1077,18 +1397,36 @@
                         <span class="subject-badge ${priorityClass}">${priorityLabel}</span>
                     </div>
                     <div class="progress-container">
-                        <div class="progress-labels"><span>Progress</span><span>${progressPct}%</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progressPct}%"></div></div>
+                        <div class="progress-labels">
+                            <span>Syllabus Progress</span>
+                            <span>${progressPct}%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${progressPct}%"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                        <span class="lesson-count">${sub.lessons.length} Syllabus Lessons</span>
+                        <div class="input-group" style="flex-direction: row; align-items: center; gap: 4px;">
+                            <label style="font-size:0.7rem;">Board:</label>
+                            <select onchange="updateSubject('${sub.id}', 'examBoard', this.value)" style="padding: 2px 4px; font-size: 0.75rem;">
+                                <option value="AQA" ${sub.examBoard === 'AQA' ? 'selected' : ''}>AQA</option>
+                                <option value="Edexcel" ${sub.examBoard === 'Edexcel' ? 'selected' : ''}>Edexcel</option>
+                                <option value="OCR" ${sub.examBoard === 'OCR' ? 'selected' : ''}>OCR</option>
+                                <option value="WJEC" ${sub.examBoard === 'WJEC' ? 'selected' : ''}>WJEC</option>
+                                <option value="IGCSE" ${sub.examBoard === 'IGCSE' ? 'selected' : ''}>IGCSE</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="subject-controls">
                         <div class="input-group">
                             <label>Confidence (1-5)</label>
                             <select onchange="updateSubject('${sub.id}', 'confidence', this.value)">
-                                ${[1,2,3,4,5].map(n => `<option value="${n}" ${sub.confidence == n ? 'selected' : ''}>${n}</option>`).join('')}
+                                ${[1,2,3,4,5].map(n => `<option value="${n}" ${sub.confidence == n ? 'selected' : ''}>${n} -${['Critical','Weak','Moderate','Good','Strong'][n-1]}</option>`).join('')}
                             </select>
                         </div>
                         <div class="input-group">
-                            <label>Score (%)</label>
+                            <label>Last Score (%)</label>
                             <input type="number" min="0" max="100" value="${sub.testScore}" ${sub.noTest ? 'disabled' : ''} onchange="updateSubject('${sub.id}', 'testScore', this.value)">
                         </div>
                     </div>
@@ -1096,25 +1434,55 @@
                         <label>Upcoming Test Date</label>
                         <input type="date" value="${sub.testDate || ''}" ${sub.noTest ? 'disabled' : ''} onchange="updateSubject('${sub.id}', 'testDate', this.value)">
                     </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                        <input type="checkbox" id="notest-${sub.id}" ${sub.noTest ? 'checked' : ''} onchange="updateSubject('${sub.id}', 'noTest', this.checked)" style="cursor: pointer; width: 14px; height: 14px;">
+                        <label for="notest-${sub.id}" style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">No test available</label>
+                    </div>
+                    <div class="add-lesson-row">
+                        <input type="text" id="add-input-${sub.id}" placeholder="Add custom lesson...">
+                        <button onclick="addCustomLesson('${sub.id}')">+ Add</button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function updateSubject(id, key, value) {
-            const sub = subjects.find(s => s.id === id);
+        function addCustomLesson(subjectId) {
+            const input = document.getElementById(`add-input-${subjectId}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const sub = subjects.find(s => s.id === subjectId);
             if (sub) {
-                sub[key] = (key === 'confidence' || key === 'testScore') ? parseFloat(value) || 0 : value;
+                const nextNum = sub.lessons.length + 1;
+                sub.lessons.push(`Lesson ${nextNum}: ${text}`);
+                input.value = '';
                 saveData();
                 renderSubjects();
                 generateSchedule();
-                showToast(`Updated ${sub.name}`);
+                showToast(`✨ Custom lesson added to ${sub.name}!`);
+            }
+        }
+
+        function updateSubject(id, key, value) {
+            const sub = subjects.find(s => s.id === id);
+            if (sub) {
+                if (key === 'confidence' || key === 'testScore') {
+                    sub[key] = parseFloat(value) || 0;
+                } else {
+                    sub[key] = value;
+                }
+                saveData();
+                renderSubjects();
+                generateSchedule();
+                showToast(`Saved updates for ${sub.name}`);
             }
         }
 
         function toggleLessonCompletion(lessonId) {
             if (completedLessons[lessonId]) {
                 delete completedLessons[lessonId];
+                showToast('Lesson marked incomplete');
             } else {
                 completedLessons[lessonId] = true;
                 recordStreakCompletion();
@@ -1126,19 +1494,24 @@
         }
 
         function toggleSlotBlocked(slotKey) {
-            if (blockedSlots[slotKey]) delete blockedSlots[slotKey];
-            else blockedSlots[slotKey] = true;
+            if (blockedSlots[slotKey]) {
+                delete blockedSlots[slotKey];
+                showToast('Timeslot unblocked');
+            } else {
+                blockedSlots[slotKey] = true;
+                showToast('Timeslot blocked');
+            }
             saveData();
             generateSchedule();
         }
 
-        // New feature: Move slot to next week for more frequent upcoming revision
+        // New feature: Move slot to next week for more frequent upcoming exam revision
         function moveSlotToNextWeek(slotKey, subjectId, lessonText) {
             if (!movedSlots[slotKey]) {
                 movedSlots[slotKey] = { subjectId, lessonText, timestamp: Date.now() };
                 saveData();
                 generateSchedule();
-                showToast('➡️ Moved to next week for extra exam revision!');
+                showToast('➡️ Postponed slot to next week for extra revision!');
             }
         }
 
@@ -1159,19 +1532,23 @@
         function saveCurrentLessonNotes() {
             if (!currentNotesLessonKey) return;
             const text = document.getElementById('lesson-notes-textarea').value.trim();
-            if (text) lessonNotes[currentNotesLessonKey] = text;
-            else delete lessonNotes[currentNotesLessonKey];
+            if (text) {
+                lessonNotes[currentNotesLessonKey] = text;
+            } else {
+                delete lessonNotes[currentNotesLessonKey];
+            }
             saveData();
             document.getElementById('notes-overlay').classList.remove('open');
-            showToast('📝 Notes saved!');
+            showToast('📝 Revision notes saved successfully!');
             generateSchedule();
         }
 
         function startPomodoro(timerId, slotKey) {
             if (activeTimers[timerId]) return;
+
             let timeLeft = 45 * 60;
             const displayEl = document.getElementById(`pomo-time-${timerId}`);
-            showToast('⏱️ Pomodoro started (45m)');
+            showToast('⏱️ Pomodoro session started (45 mins)');
 
             activeTimers[timerId] = setInterval(() => {
                 if (timeLeft <= 0) {
@@ -1179,13 +1556,16 @@
                     delete activeTimers[timerId];
                     playChime();
                     triggerConfetti();
+                    showToast('⏰ Pomodoro session finished! Great focus.');
                     toggleLessonCompletion(slotKey);
                     return;
                 }
                 timeLeft--;
                 const m = Math.floor(timeLeft / 60);
                 const s = timeLeft % 60;
-                if(displayEl) displayEl.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                if(displayEl) {
+                    displayEl.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                }
             }, 1000);
         }
 
@@ -1193,20 +1573,25 @@
             if (activeTimers[timerId]) {
                 clearInterval(activeTimers[timerId]);
                 delete activeTimers[timerId];
+                showToast('Pomodoro paused');
             }
         }
 
         function resetPomodoro(timerId) {
             pausePomodoro(timerId);
             const displayEl = document.getElementById(`pomo-time-${timerId}`);
-            if(displayEl) displayEl.innerText = `45:00`;
+            if(displayEl) {
+                displayEl.innerText = `45:00`;
+            }
         }
 
         function getDatesForSelectedWeek() {
             const weekPicker = document.getElementById('week-start-date');
             let selectedDate = weekPicker.value ? new Date(weekPicker.value) : new Date();
+
             const currentDay = selectedDate.getDay();
             const distanceToMon = currentDay === 0 ? -6 : 1 - currentDay;
+
             const monday = new Date(selectedDate);
             monday.setDate(selectedDate.getDate() + distanceToMon);
 
@@ -1221,13 +1606,19 @@
 
         function generateSchedule() {
             calculateWeights();
+
             subjects.forEach(sub => { lessonPointers[sub.id] = 0; });
 
             const container = document.getElementById('timetable-grid');
             container.innerHTML = '';
 
             if (isOnHoliday) {
-                container.innerHTML = `<div class="holiday-banner">🏖️ Holiday Mode Active</div>`;
+                container.innerHTML = `
+                    <div class="holiday-banner">
+                        🏖️ On Holiday Mode Active
+                        <p>All revision sessions are temporarily paused. Enjoy your break!</p>
+                    </div>
+                `;
                 return;
             }
 
@@ -1235,6 +1626,7 @@
             const weekdayHours = parseInt(document.getElementById('hours-weekday').value) || 2;
             const weekendHours = parseInt(document.getElementById('hours-weekend').value) || 4;
             const now = new Date();
+
             let subjectPoolIndex = 0;
 
             dates.forEach((date, index) => {
@@ -1245,16 +1637,9 @@
 
                 const dayCard = document.createElement('div');
                 dayCard.className = `day-card ${isToday ? 'today' : ''}`;
+
                 let slotsHTML = '';
                 let timeStart = isWeekend ? 10 : 17;
-
-                // Check if any slots were moved TO this week from last week
-                // (For simplicity, we check if there are any moved slots matching current week day offset)
-                let extraMovedLessons = [];
-                Object.keys(movedSlots).forEach(mKey => {
-                    // If moved slot corresponds roughly or we just append them to the first available spots
-                    // Let's attach them if they match this day or put them in a queue
-                });
 
                 const tasksForThisDay = customTasks.filter(t => t.dueDate === dateStrIso);
                 let taskQueueIndex = 0;
@@ -1263,6 +1648,7 @@
                     const slotKey = `slot_${dateStrIso}_${h}`;
                     const isBlocked = !!blockedSlots[slotKey];
                     const isMovedAway = !!movedSlots[slotKey];
+
                     const startTimeStr = `${timeStart}:00`;
                     const endTimeStr = `${timeStart}:45`;
                     const timerInstanceId = `timer_${index}_${h}`;
@@ -1270,9 +1656,9 @@
                     if (isMovedAway) {
                         slotsHTML += `
                             <div class="session-slot blocked">
-                                <div class="session-time">${startTimeStr} - ${endTimeStr}</div>
+                                <div class="session-time">${startTimeStr} - ${endTimeStr} (45 mins)</div>
                                 <div class="session-subject">Postponed Slot</div>
-                                <div class="session-task">Moved to next week for extra exam revision.</div>
+                                <div class="session-task">Moved to next week for additional revision.</div>
                             </div>
                         `;
                         timeStart++;
@@ -1281,12 +1667,34 @@
 
                     if (!isBlocked && taskQueueIndex < tasksForThisDay.length) {
                         const task = tasksForThisDay[taskQueueIndex++];
+                        const isCompleted = task.completed;
+                        const uniqueLessonKey = `custom_task_${task.id}`;
+                        const slotStartTime = new Date(date);
+                        slotStartTime.setHours(timeStart, 0, 0, 0);
+                        const slotEndTime = new Date(date);
+                        slotEndTime.setHours(timeStart, 45, 0, 0);
+                        const isLiveNow = isToday && now >= slotStartTime && now <= slotEndTime;
+
                         slotsHTML += `
-                            <div class="session-slot homework-prio">
-                                <div class="session-time">${startTimeStr} - ${endTimeStr} • [Custom Task]</div>
-                                <div class="session-subject">📋 ${task.title}</div>
+                            <div class="session-slot homework-prio ${isLiveNow ? 'active-now' : ''} ${isCompleted ? 'completed' : ''}">
+                                ${isLiveNow ? '<span class="live-indicator">LIVE NOW</span>' : ''}
+                                <div class="session-time">${startTimeStr} - ${endTimeStr} (45 mins) • [Homework/Task]</div>
+                                <div class="session-subject">📋 Custom Task / Homework</div>
+                                <div class="session-task">${task.title}</div>
+                                
+                                <div class="pomodoro-container">
+                                    <span class="pomodoro-display" id="pomo-time-${timerInstanceId}">45:00</span>
+                                    <div class="pomodoro-btns">
+                                        <button class="pom-btn" onclick="startPomodoro('${timerInstanceId}', '${uniqueLessonKey}')">▶</button>
+                                        <button class="pom-btn" onclick="pausePomodoro('${timerInstanceId}')">⏸</button>
+                                        <button class="pom-btn" onclick="resetPomodoro('${timerInstanceId}')">↺</button>
+                                    </div>
+                                </div>
+
                                 <div class="session-actions">
-                                    <span class="click-hint" onclick="toggleCustomTask('${task.id}')">${task.completed ? 'Done' : 'Mark Done'}</span>
+                                    <span class="click-hint" onclick="toggleCustomTask('${task.id}')">
+                                        ${isCompleted ? '✓ Done (Restore)' : 'Mark Complete'}
+                                    </span>
                                     <span class="block-hint" onclick="toggleSlotBlocked('${slotKey}')">Block</span>
                                 </div>
                             </div>
@@ -1296,51 +1704,91 @@
                     }
 
                     const sub = subjects[subjectPoolIndex % subjects.length];
-                    if (!isBlocked) subjectPoolIndex++;
+                    if (!isBlocked) {
+                        subjectPoolIndex++;
+                    }
 
                     let activeLessonIndex = lessonPointers[sub.id] % sub.lessons.length;
                     let lessonText = sub.lessons[activeLessonIndex];
                     let uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${dateStrIso}_${h}`;
 
-                    // Smarter test rearrangement message if test is very close
+                    // Smarter test rearrangement
                     if (sub.testDate && !sub.noTest) {
-                        const testTime = new Date(sub.testDate).setHours(0,0,0,0);
-                        const slotTime = new Date(date).setHours(0,0,0,0);
-                        const diffDays = (testTime - slotTime)/(1000*60*60*24);
+                        const testTime = new Date(sub.testDate).setHours(0, 0, 0, 0);
+                        const slotTime = new Date(date).setHours(0, 0, 0, 0);
+                        const diffDays = (testTime - slotTime) / (1000 * 60 * 60 * 24);
                         if (diffDays >= 0 && diffDays <= 14) {
                             lessonText = `🚨 Intensive Exam Revision & Past Paper Practice (Test in ${Math.round(diffDays)} days)`;
                         }
                     }
 
-                    if (!isBlocked) lessonPointers[sub.id]++;
+                    let attempts = 0;
+                    while (completedLessons[uniqueLessonKey] && attempts < sub.lessons.length) {
+                        lessonPointers[sub.id]++;
+                        activeLessonIndex = lessonPointers[sub.id] % sub.lessons.length;
+                        lessonText = sub.lessons[activeLessonIndex];
+                        uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${dateStrIso}_${h}`;
+                        attempts++;
+                    }
+
+                    if (!isBlocked) {
+                        lessonPointers[sub.id]++;
+                    }
+
                     const isCompleted = !!completedLessons[uniqueLessonKey];
                     const hasNotes = !!lessonNotes[uniqueLessonKey];
-                    let priorityClass = sub.weight > 60 ? 'high-prio' : (sub.weight > 30 ? 'med-prio' : 'low-prio');
 
-                    slotsHTML += `
-                        <div class="session-slot ${priorityClass} ${isCompleted ? 'completed' : ''}">
-                            <div class="session-time">${startTimeStr} - ${endTimeStr} • [${sub.examBoard}]</div>
-                            <div class="session-subject">${sub.name}</div>
-                            <div class="session-task">${lessonText}</div>
-                            ${hasNotes ? `<div style="font-size:0.7rem; color:var(--accent-purple);">📝 Notes attached</div>` : ''}
-                            
-                            <div class="pomodoro-container">
-                                <span class="pomodoro-display" id="pomo-time-${timerInstanceId}">45:00</span>
-                                <div class="pomodoro-btns">
-                                    <button class="pom-btn" onclick="startPomodoro('${timerInstanceId}', '${uniqueLessonKey}')">▶</button>
-                                    <button class="pom-btn" onclick="pausePomodoro('${timerInstanceId}')">⏸</button>
-                                    <button class="pom-btn" onclick="resetPomodoro('${timerInstanceId}')">↺</button>
+                    let priorityClass = 'low-prio';
+                    if (sub.weight > 50) priorityClass = 'high-prio';
+                    else if (sub.weight > 30) priorityClass = 'med-prio';
+
+                    const slotStartTime = new Date(date);
+                    slotStartTime.setHours(timeStart, 0, 0, 0);
+                    const slotEndTime = new Date(date);
+                    slotEndTime.setHours(timeStart, 45, 0, 0);
+
+                    const isLiveNow = isToday && now >= slotStartTime && now <= slotEndTime && !isBlocked;
+
+                    if (isBlocked) {
+                        slotsHTML += `
+                            <div class="session-slot blocked">
+                                <div class="session-time">${startTimeStr} - ${endTimeStr} (45 mins)</div>
+                                <div class="session-subject">Unavailable Slot</div>
+                                <div class="session-task">This timeslot has been blocked out.</div>
+                                <div class="session-actions">
+                                    <span class="block-hint" onclick="toggleSlotBlocked('${slotKey}')">Unblock Slot</span>
                                 </div>
                             </div>
+                        `;
+                    } else {
+                        slotsHTML += `
+                            <div class="session-slot ${priorityClass} ${isLiveNow ? 'active-now' : ''} ${isCompleted ? 'completed' : ''}">
+                                ${isLiveNow ? '<span class="live-indicator">LIVE NOW</span>' : ''}
+                                <div class="session-time">${startTimeStr} - ${endTimeStr} (45 mins) • [${sub.examBoard}]</div>
+                                <div class="session-subject">${sub.name}</div>
+                                <div class="session-task">${lessonText}</div>
+                                ${hasNotes ? `<div style="font-size:0.75rem; color: var(--accent-purple); font-style: italic;">📝 Has Custom Notes</div>` : ''}
+                                
+                                <div class="pomodoro-container">
+                                    <span class="pomodoro-display" id="pomo-time-${timerInstanceId}">45:00</span>
+                                    <div class="pomodoro-btns">
+                                        <button class="pom-btn" onclick="startPomodoro('${timerInstanceId}', '${uniqueLessonKey}')">▶</button>
+                                        <button class="pom-btn" onclick="pausePomodoro('${timerInstanceId}')">⏸</button>
+                                        <button class="pom-btn" onclick="resetPomodoro('${timerInstanceId}')">↺</button>
+                                    </div>
+                                </div>
 
-                            <div class="session-actions">
-                                <span class="click-hint" onclick="toggleLessonCompletion('${uniqueLessonKey}')">${isCompleted ? 'Undo' : 'Done'}</span>
-                                <span class="notes-hint" onclick="openNotesDrawer('${uniqueLessonKey}', '${sub.name}')">Notes</span>
-                                <span class="move-hint" onclick="moveSlotToNextWeek('${slotKey}', '${sub.id}', '${lessonText}')">➡️ Next Week</span>
-                                <span class="block-hint" onclick="toggleSlotBlocked('${slotKey}')">Block</span>
+                                <div class="session-actions">
+                                    <span class="click-hint" onclick="toggleLessonCompletion('${uniqueLessonKey}')">
+                                        ${isCompleted ? '✓ Done (Restore)' : 'Mark Complete'}
+                                    </span>
+                                    <span class="notes-hint" onclick="openNotesDrawer('${uniqueLessonKey}', '${sub.name}')">Notes</span>
+                                    <span class="move-hint" onclick="moveSlotToNextWeek('${slotKey}', '${sub.id}', '${lessonText}')">➡️ Next Week</span>
+                                    <span class="block-hint" onclick="toggleSlotBlocked('${slotKey}')">Block</span>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                     timeStart++;
                 }
 
@@ -1354,6 +1802,7 @@
                     </div>
                     ${slotsHTML}
                 `;
+
                 container.appendChild(dayCard);
             });
         }
@@ -1361,27 +1810,117 @@
         function switchMobileTab(tabName, btn) {
             document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
+
             document.querySelectorAll('.dashboard-grid .panel').forEach(panel => panel.classList.remove('mobile-active'));
-            if (tabName === 'subjects') document.getElementById('panel-subjects').classList.add('mobile-active');
-            else if (tabName === 'schedule') document.getElementById('panel-schedule').classList.add('mobile-active');
+            if (tabName === 'subjects') {
+                document.getElementById('panel-subjects').classList.add('mobile-active');
+            } else if (tabName === 'schedule') {
+                document.getElementById('panel-schedule').classList.add('mobile-active');
+            }
         }
 
         function exportToICS() {
-            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GCSE Planner//EN\n";
-            const blob = new Blob([ics + "END:VCALENDAR"], { type: 'text/calendar;charset=utf-8' });
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//GCSE Master Planner//EN\n";
+            const dates = getDatesForSelectedWeek();
+            const weekdayHours = parseInt(document.getElementById('hours-weekday').value) || 2;
+            const weekendHours = parseInt(document.getElementById('hours-weekend').value) || 4;
+
+            let subjectPoolIndex = 0;
+
+            dates.forEach((date, index) => {
+                const isWeekend = index >= 5;
+                const hours = isWeekend ? weekendHours : weekdayHours;
+                let timeStart = isWeekend ? 10 : 17;
+                const dateStrIso = date.toISOString().split('T')[0];
+                const tasksForThisDay = customTasks.filter(t => t.dueDate === dateStrIso);
+                let taskQueueIndex = 0;
+
+                for (let h = 0; h < hours; h++) {
+                    const slotKey = `slot_${dateStrIso}_${h}`;
+                    const isBlocked = !!blockedSlots[slotKey];
+                    const isMovedAway = !!movedSlots[slotKey];
+
+                    if (isMovedAway) {
+                        timeStart++;
+                        continue;
+                    }
+
+                    if (!isBlocked && taskQueueIndex < tasksForThisDay.length) {
+                        const task = tasksForThisDay[taskQueueIndex++];
+                        const startDt = new Date(date);
+                        startDt.setHours(timeStart, 0, 0, 0);
+                        const endDt = new Date(date);
+                        endDt.setHours(timeStart, 45, 0, 0);
+                        const formatDateStr = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+                        icsContent += "BEGIN:VEVENT\n";
+                        icsContent += `SUMMARY:Custom Task: ${task.title}\n`;
+                        icsContent += `DESCRIPTION:Homework / Custom Task\n`;
+                        icsContent += `DTSTART:${formatDateStr(startDt)}\n`;
+                        icsContent += `DTEND:${formatDateStr(endDt)}\n`;
+                        icsContent += "END:VEVENT\n";
+                        timeStart++;
+                        continue;
+                    }
+
+                    const sub = subjects[subjectPoolIndex % subjects.length];
+                    if (!isBlocked) {
+                        subjectPoolIndex++;
+                    }
+
+                    if (isBlocked) {
+                        timeStart++;
+                        continue;
+                    }
+
+                    let activeLessonIndex = lessonPointers[sub.id] % sub.lessons.length;
+                    let lessonText = sub.lessons[activeLessonIndex];
+
+                    const startDt = new Date(date);
+                    startDt.setHours(timeStart, 0, 0, 0);
+                    const endDt = new Date(date);
+                    endDt.setHours(timeStart, 45, 0, 0);
+
+                    const formatDateStr = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+                    icsContent += "BEGIN:VEVENT\n";
+                    icsContent += `SUMMARY:${sub.name} [${sub.examBoard}]\n`;
+                    icsContent += `DESCRIPTION:${lessonText.replace(/\n/g, ' ')}\n`;
+                    icsContent += `DTSTART:${formatDateStr(startDt)}\n`;
+                    icsContent += `DTEND:${formatDateStr(endDt)}\n`;
+                    icsContent += "END:VEVENT\n";
+
+                    timeStart++;
+                }
+            });
+
+            icsContent += "END:VCALENDAR";
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'gcse_revision.ics');
+            link.setAttribute('download', 'gcse_revision_schedule.ics');
+            document.body.appendChild(link);
             link.click();
-            showToast('📅 ICS Exported');
+            document.body.removeChild(link);
+            showToast('📅 ICS Calendar file downloaded successfully!');
         }
 
-        document.getElementById('week-start-date').value = new Date().toISOString().split('T')[0];
-        renderSubjects();
-        renderCustomTasks();
-        generateSchedule();
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('week-start-date').value = todayStr;
+        document.getElementById('holiday-mode-toggle').checked = isOnHoliday;
+
+        document.getElementById('hours-weekday').addEventListener('change', generateSchedule);
+        document.getElementById('hours-weekend').addEventListener('change', generateSchedule);
+
         updateLiveCountdown();
+        updateStreakDisplay();
+        renderCustomTasks();
         setInterval(updateLiveCountdown, 1000);
+        setInterval(generateSchedule, 60000);
+
+        renderSubjects();
+        generateSchedule();
     </script>
 </body>
 </html>
