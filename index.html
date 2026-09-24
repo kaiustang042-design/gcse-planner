@@ -199,7 +199,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 650px;
+            max-height: 500px;
             overflow-y: auto;
             padding-right: 6px;
         }
@@ -306,17 +306,6 @@
         .add-lesson-row input {
             flex: 1;
         }
-
-        .add-lesson-row button {
-            background-color: var(--accent-purple);
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .add-lesson-row button:hover { opacity: 0.9; }
 
         .lesson-count {
             font-size: 0.75rem;
@@ -446,6 +435,7 @@
         .session-slot.high-prio { border-left-color: var(--accent-red); }
         .session-slot.med-prio { border-left-color: var(--accent-amber); }
         .session-slot.low-prio { border-left-color: var(--accent-green); }
+        .session-slot.homework-prio { border-left-color: var(--accent-purple); background-color: rgba(129, 140, 248, 0.08); }
 
         .live-indicator {
             position: absolute;
@@ -746,6 +736,24 @@
                 </div>
             </div>
 
+            <!-- Custom Tasks & Homework Card -->
+            <div class="subject-card" style="border-color: var(--accent-purple);">
+                <div class="subject-header">
+                    <span>📋 Custom Tasks & Homework</span>
+                    <span class="subject-badge" style="background-color: rgba(129, 140, 248, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple);">Planner</span>
+                </div>
+                <div class="add-lesson-row" style="margin-top: 4px;">
+                    <input type="text" id="new-task-title" placeholder="e.g. Science coursework, History essay...">
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <input type="date" id="new-task-date" style="flex: 1;" title="Due date (automatically added to timetable)">
+                    <button onclick="addCustomTask()" style="background-color: var(--accent-purple); color: white; border: none; padding: 4px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add to Schedule</button>
+                </div>
+                <div id="custom-tasks-list" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 180px; overflow-y: auto;">
+                    <!-- Custom tasks injected here -->
+                </div>
+            </div>
+
             <div class="subject-list" id="subject-list">
                 <!-- Subjects & Lesson counters injected here -->
             </div>
@@ -805,6 +813,7 @@
         const STREAK_KEY = 'gcse_revision_streak_data_v3';
         const NOTES_KEY = 'gcse_revision_lesson_notes_v3';
         const THEME_KEY = 'gcse_revision_theme_v3';
+        const CUSTOM_TASKS_KEY = 'gcse_revision_custom_tasks_v3';
 
         const defaultDatabase = [
             {
@@ -1160,6 +1169,7 @@
         let isOnHoliday = JSON.parse(localStorage.getItem(HOLIDAY_KEY)) || false;
         let streakData = JSON.parse(localStorage.getItem(STREAK_KEY)) || { currentStreak: 0, lastCompletedDate: null };
         let lessonNotes = JSON.parse(localStorage.getItem(NOTES_KEY)) || {};
+        let customTasks = JSON.parse(localStorage.getItem(CUSTOM_TASKS_KEY)) || [];
         let currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
 
         let lessonPointers = {};
@@ -1258,6 +1268,7 @@
             localStorage.setItem(HOLIDAY_KEY, JSON.stringify(isOnHoliday));
             localStorage.setItem(STREAK_KEY, JSON.stringify(streakData));
             localStorage.setItem(NOTES_KEY, JSON.stringify(lessonNotes));
+            localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(customTasks));
             updateStreakDisplay();
         }
 
@@ -1334,7 +1345,6 @@
             if (total === 0) return 0;
             let completedCount = 0;
             sub.lessons.forEach((_, idx) => {
-                // Check if any slot matching this subject & lesson index is completed
                 Object.keys(completedLessons).forEach(key => {
                     if (key.startsWith(`${sub.id}_${idx}_`)) {
                         completedCount++;
@@ -1343,6 +1353,82 @@
             });
             let pct = Math.min(100, Math.round((completedCount / total) * 100));
             return pct;
+        }
+
+        function addCustomTask() {
+            const titleInput = document.getElementById('new-task-title');
+            const dateInput = document.getElementById('new-task-date');
+            const title = titleInput.value.trim();
+            const dueDate = dateInput.value;
+
+            if (!title) {
+                showToast('⚠️ Please enter a task title');
+                return;
+            }
+
+            const newTask = {
+                id: 'task_' + Date.now(),
+                title: title,
+                dueDate: dueDate || '',
+                completed: false
+            };
+
+            customTasks.push(newTask);
+            titleInput.value = '';
+            dateInput.value = '';
+            saveData();
+            renderCustomTasks();
+            generateSchedule();
+            showToast('✅ Task added to schedule & tracker!');
+        }
+
+        function toggleCustomTask(taskId) {
+            const task = customTasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                if (task.completed) {
+                    recordStreakCompletion();
+                    showToast('🎉 Task completed!');
+                }
+                saveData();
+                renderCustomTasks();
+                generateSchedule();
+            }
+        }
+
+        function deleteCustomTask(taskId) {
+            customTasks = customTasks.filter(t => t.id !== taskId);
+            saveData();
+            renderCustomTasks();
+            generateSchedule();
+            showToast('🗑️ Task removed');
+        }
+
+        function renderCustomTasks() {
+            const container = document.getElementById('custom-tasks-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (customTasks.length === 0) {
+                container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 4px;">No active custom tasks or homework.</div>`;
+                return;
+            }
+
+            customTasks.forEach(task => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); padding: 8px; border-radius: 6px; border: 1px solid var(--card-border); font-size: 0.8rem;';
+                
+                const dueText = task.dueDate ? ` <span style="font-size: 0.7rem; color: var(--accent-amber);">(${task.dueDate})</span>` : '';
+                
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleCustomTask('${task.id}')" style="cursor: pointer; width: 14px; height: 14px;">
+                        <span style="${task.completed ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${task.title}${dueText}</span>
+                    </div>
+                    <button onclick="deleteCustomTask('${task.id}')" style="background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 0.8rem;" title="Delete task">✕</button>
+                `;
+                container.appendChild(item);
+            });
         }
 
         function renderSubjects() {
@@ -1598,6 +1684,7 @@
                 const isWeekend = index >= 5;
                 const hours = isWeekend ? weekendHours : weekdayHours;
                 const isToday = date.toDateString() === now.toDateString();
+                const dateStrIso = date.toISOString().split('T')[0];
 
                 const dayCard = document.createElement('div');
                 dayCard.className = `day-card ${isToday ? 'today' : ''}`;
@@ -1605,9 +1692,56 @@
                 let slotsHTML = '';
                 let timeStart = isWeekend ? 10 : 17;
 
+                // Find any custom tasks due on this specific date
+                const tasksForThisDay = customTasks.filter(t => t.dueDate === dateStrIso);
+                let taskQueueIndex = 0;
+
                 for (let h = 0; h < hours; h++) {
-                    const slotKey = `slot_${date.toISOString().split('T')[0]}_${h}`;
+                    const slotKey = `slot_${dateStrIso}_${h}`;
                     const isBlocked = !!blockedSlots[slotKey];
+
+                    const startTimeStr = `${timeStart}:00`;
+                    const endTimeStr = `${timeStart}:45`;
+                    const timerInstanceId = `timer_${index}_${h}`;
+
+                    // Check if we have a custom task for this slot
+                    if (!isBlocked && taskQueueIndex < tasksForThisDay.length) {
+                        const task = tasksForThisDay[taskQueueIndex++];
+                        const isCompleted = task.completed;
+                        const uniqueLessonKey = `custom_task_${task.id}`;
+                        const slotStartTime = new Date(date);
+                        slotStartTime.setHours(timeStart, 0, 0, 0);
+                        const slotEndTime = new Date(date);
+                        slotEndTime.setHours(timeStart, 45, 0, 0);
+                        const isLiveNow = isToday && now >= slotStartTime && now <= slotEndTime;
+
+                        slotsHTML += `
+                            <div class="session-slot homework-prio ${isLiveNow ? 'active-now' : ''} ${isCompleted ? 'completed' : ''}">
+                                ${isLiveNow ? '<span class="live-indicator">LIVE NOW</span>' : ''}
+                                <div class="session-time">${startTimeStr} - ${endTimeStr} (45 mins) • [Homework/Task]</div>
+                                <div class="session-subject">📋 Custom Task / Homework</div>
+                                <div class="session-task">${task.title}</div>
+                                
+                                <div class="pomodoro-container">
+                                    <span class="pomodoro-display" id="pomo-time-${timerInstanceId}">45:00</span>
+                                    <div class="pomodoro-btns">
+                                        <button class="pom-btn" onclick="startPomodoro('${timerInstanceId}', '${uniqueLessonKey}')">▶</button>
+                                        <button class="pom-btn" onclick="pausePomodoro('${timerInstanceId}')">⏸</button>
+                                        <button class="pom-btn" onclick="resetPomodoro('${timerInstanceId}')">↺</button>
+                                    </div>
+                                </div>
+
+                                <div class="session-actions">
+                                    <span class="click-hint" onclick="toggleCustomTask('${task.id}')">
+                                        ${isCompleted ? '✓ Done (Restore)' : 'Mark Complete'}
+                                    </span>
+                                    <span class="block-hint" onclick="toggleSlotBlocked('${slotKey}')">Block</span>
+                                </div>
+                            </div>
+                        `;
+                        timeStart++;
+                        continue;
+                    }
 
                     const sub = subjects[subjectPoolIndex % subjects.length];
                     if (!isBlocked) {
@@ -1616,7 +1750,7 @@
 
                     let activeLessonIndex = lessonPointers[sub.id] % sub.lessons.length;
                     let lessonText = sub.lessons[activeLessonIndex];
-                    let uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${date.toISOString().split('T')[0]}_${h}`;
+                    let uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${dateStrIso}_${h}`;
 
                     if (sub.testDate && !sub.noTest) {
                         const testTime = new Date(sub.testDate).setHours(0, 0, 0, 0);
@@ -1632,7 +1766,7 @@
                         lessonPointers[sub.id]++;
                         activeLessonIndex = lessonPointers[sub.id] % sub.lessons.length;
                         lessonText = sub.lessons[activeLessonIndex];
-                        uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${date.toISOString().split('T')[0]}_${h}`;
+                        uniqueLessonKey = `${sub.id}_${activeLessonIndex}_${dateStrIso}_${h}`;
                         attempts++;
                     }
 
@@ -1653,11 +1787,6 @@
                     slotEndTime.setHours(timeStart, 45, 0, 0);
 
                     const isLiveNow = isToday && now >= slotStartTime && now <= slotEndTime && !isBlocked;
-
-                    const startTimeStr = `${timeStart}:00`;
-                    const endTimeStr = `${timeStart}:45`;
-                    const timerInstanceId = `timer_${index}_${h}`;
-                    timeStart++;
 
                     if (isBlocked) {
                         slotsHTML += `
@@ -1698,14 +1827,15 @@
                             </div>
                         `;
                     }
+                    timeStart++;
                 }
 
                 const dayName = date.toLocaleDateString('en-GB', { weekday: 'short' });
-                const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                const dateHeaderStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
                 dayCard.innerHTML = `
                     <div class="day-header">
-                        <span>${dayName} <span class="date">(${dateStr})</span></span>
+                        <span>${dayName} <span class="date">(${dateHeaderStr})</span></span>
                         ${isToday ? '<span class="today-tag">Today</span>' : ''}
                     </div>
                     ${slotsHTML}
@@ -1739,10 +1869,31 @@
                 const isWeekend = index >= 5;
                 const hours = isWeekend ? weekendHours : weekdayHours;
                 let timeStart = isWeekend ? 10 : 17;
+                const dateStrIso = date.toISOString().split('T')[0];
+                const tasksForThisDay = customTasks.filter(t => t.dueDate === dateStrIso);
+                let taskQueueIndex = 0;
 
                 for (let h = 0; h < hours; h++) {
-                    const slotKey = `slot_${date.toISOString().split('T')[0]}_${h}`;
+                    const slotKey = `slot_${dateStrIso}_${h}`;
                     const isBlocked = !!blockedSlots[slotKey];
+
+                    if (!isBlocked && taskQueueIndex < tasksForThisDay.length) {
+                        const task = tasksForThisDay[taskQueueIndex++];
+                        const startDt = new Date(date);
+                        startDt.setHours(timeStart, 0, 0, 0);
+                        const endDt = new Date(date);
+                        endDt.setHours(timeStart, 45, 0, 0);
+                        const formatDateStr = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+                        icsContent += "BEGIN:VEVENT\n";
+                        icsContent += `SUMMARY:Custom Task: ${task.title}\n`;
+                        icsContent += `DESCRIPTION:Homework / Custom Task\n`;
+                        icsContent += `DTSTART:${formatDateStr(startDt)}\n`;
+                        icsContent += `DTEND:${formatDateStr(endDt)}\n`;
+                        icsContent += "END:VEVENT\n";
+                        timeStart++;
+                        continue;
+                    }
 
                     const sub = subjects[subjectPoolIndex % subjects.length];
                     if (!isBlocked) {
@@ -1796,6 +1947,7 @@
 
         updateLiveCountdown();
         updateStreakDisplay();
+        renderCustomTasks();
         setInterval(updateLiveCountdown, 1000);
         setInterval(generateSchedule, 60000);
 
